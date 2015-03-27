@@ -59,7 +59,7 @@
       <!-- The title of the ion-view will be shown on the navbar -->
       <ion-view title="Welcome to {{programName}} - Staff login">
         <ion-content>
-          <form class="list list-inset" ng-submit="login()">
+          <form class="list list-inset" ng-submit="staffLogin()">
             <label class="item item-input">
               <span class="input-label">Staff Id</span>
               <input type="text" ng-model="staffInput.Id" placeholder="Type your Id" required autofocus>
@@ -79,12 +79,22 @@
     <script id="tables.html" type="text/ng-template">
       <ion-view title="Touch a table number to select it">
         <ion-content>
-          <div ng-repeat="table in tables">
-            <button class="button button-positive" ng-click="TableSelected($index)"
-                    style="position:absolute;top:{{table.tableXpos}};left:{{table.tableYpos}};height:150px;width:150px">
-              {{table.tableNumber}}
-            </button>
+
+
+          <div ng-repeat="area in tableAreas">
+            <div>{{area.name}}</div>
+
+            <div ng-repeat="table in area.tables">
+              <button class="button button-positive" ng-click="TableSelected($index)"
+                      style="position:absolute;top:{{table.tableXpos}};left:{{table.tableYpos}};height:150px;width:150px">
+                {{table.tableNumber}}
+              </button>
+            </div>
+
           </div>
+
+
+
         </ion-content>
       </ion-view>
     </script>
