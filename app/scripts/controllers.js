@@ -1,26 +1,45 @@
 'use strict';
-angular.module('MainApp.controllers', [])
+angular.module('AppMain.controllers', [])
 
-.controller('MainCtrl', ['$scope', '$rootScope', '$state', 'LoginSvc', 'RegisterSvc',
-                function($scope, $rootScope, $state, LoginSvc, RegisterSvc) {
+.controller('MainCtrl', ['$scope', '$rootScope', '$state', '$ionicPopup', '$window', 'LoginSvc', 'RegisterSvc', 'OrderSvc',
+                function($scope, $rootScope, $state, $ionicPopup, $window, LoginSvc, RegisterSvc, OrderSvc) {
     $scope.notifyGoHome = function() {
-        $rootScope.$emit('want.to.go.home');
-    }
+      console.log("notifyGoHome clicked");
+      //$rootScope.$emit('want.to.go.home');
+
+        var p = $ionicPopup.confirm({
+          title: OrderSvc.totalLineItemsPending() ? 'The selected items will be cleared' : 'Close App' ,
+          template: 'Sure you want to close app?'
+        });
+
+        p.then(function (res) {
+          if (res) {
+            OrderSvc.empty();
+            $window.location.href = 'index.html';
+          } else {
+            console.log('do not want to close app');
+            //p.close();
+          }
+        })
+    };
+
 
     $scope.loggedIn = function(){
-        return $rootScope.customerName || $rootScope.customerName != '';
+      return $rootScope.customerName || $rootScope.customerName != '';
     }
 
     $scope.notInMenu = function(){
-        return $scope.loggedIn() || $state.$current.name.indexOf("tab") < 0;
+      return $scope.loggedIn() || $state.$current.name.indexOf("tab") < 0;
     }
 
     $scope.openLoginModal = function() {
-        LoginSvc.openLoginModal('tab.menus') ;   //$state.$current.name);
+      console.log("openLoginModal clicked");
+      LoginSvc.openLoginModal('tab.menus') ;   //$state.$current.name);
     }
 
     $scope.openRegisterModal = function() {
-        RegisterSvc.openRegisterModal('tab.menus') ;   //$state.$current.name);
+      console.log("openRegisterModal clicked");
+      RegisterSvc.openRegisterModal('tab.menus') ;   //$state.$current.name);
     }
 }])
 
@@ -55,13 +74,14 @@ angular.module('MainApp.controllers', [])
         };
     };
 
-    var cleanupFunction = $rootScope.$on('want.to.go.home', function() {
+/*    var cleanupFunction = $rootScope.$on('want.to.go.home', function(e) {
+        e.stopPropagation();
         $rootScope.confirmAndGoHome()
     });
 
     $scope.$on('$destroy', function() {
       cleanupFunction();
-    });
+    });*/
 
  }])
 
@@ -96,13 +116,14 @@ angular.module('MainApp.controllers', [])
         $state.go('tab.vieworder');
     };
 
-    var cleanupFunction = $rootScope.$on('want.to.go.home', function() {
+/*    var cleanupFunction = $rootScope.$on('want.to.go.home', function(e) {
+        e.stopPropagation();
         $rootScope.confirmAndGoHome()
     });
 
     $scope.$on('$destroy', function() {
         cleanupFunction();
-    });
+    });*/
 }])
 
 
@@ -122,47 +143,54 @@ angular.module('MainApp.controllers', [])
         $state.go('tab.vieworder');
     };
 
-    var cleanupFunction = $rootScope.$on('want.to.go.home', function() {
+/*    var cleanupFunction = $rootScope.$on('want.to.go.home', function(e) {
+        e.stopPropagation();
         $rootScope.confirmAndGoHome()
     });
 
     $scope.$on('$destroy', function() {
         cleanupFunction();
-    });
+    });*/
 }])
 
 .controller('ViewOrderCtrl', ['$scope', '$stateParams', '$rootScope', 'OrderSvc',
                     function($scope, $stateParams, $rootScope, OrderSvc) {
     $scope.orderSvc = OrderSvc;
 
-    var cleanupFunction = $rootScope.$on('want.to.go.home', function() {
+/*    var cleanupFunction = $rootScope.$on('want.to.go.home', function(e) {
+        e.stopPropagation();
         $rootScope.confirmAndGoHome()
     });
 
     $scope.$on('$destroy', function() {
         cleanupFunction();
-    });
+    });*/
 }])
 
 
-.controller('CoverPageCtrl', ['$scope', '$state', '$stateParams', '$rootScope',
-    function($scope, $state, $stateParams, $rootScope) {
+.controller('CoverPageCtrl', ['$scope', '$state', '$stateParams', '$rootScope', 'OrderSvc',
+    function($scope, $state, $stateParams, $rootScope, OrderSvc) {
         $rootScope.staffId = $stateParams.staffId;
-        $rootScope.selectedTableIndex = $stateParams.selectedTableIndex;
+        $rootScope.tableArea = $stateParams.tableArea;
         $rootScope.tableNumber = $stateParams.tableNumber;
+
+        OrderSvc.loadOrder();       //todo: decide the correct location for this statement - assuming coverpage will be called once
 
         $scope.ShowFirstPage = function(){
             $state.go('firstpage');
 
         }
 
-        var cleanupFunction = $rootScope.$on('want.to.go.home', function() {
+/*
+        var cleanupFunction = $rootScope.$on('want.to.go.home', function(e) {
+            e.stopPropagation();
             $rootScope.confirmAndGoHome()
         });
 
         $scope.$on('$destroy', function() {
             cleanupFunction();
         });
+*/
 
     }])
 
@@ -177,7 +205,8 @@ angular.module('MainApp.controllers', [])
         $state.go('tab.menus');
     };
 
-    var cleanupFunction = $rootScope.$on('want.to.go.home', function() {
+    var cleanupFunction = $rootScope.$on('want.to.go.home', function(e) {
+        e.stopPropagation();
         $rootScope.confirmAndGoHome()
     });
 
@@ -204,13 +233,14 @@ angular.module('MainApp.controllers', [])
             $state.go('tab.menus', {customerName: $stateParams.customerName});
         };
 
-        var cleanupFunction = $rootScope.$on('want.to.go.home', function() {
+/*        var cleanupFunction = $rootScope.$on('want.to.go.home', function(e) {
+            e.stopPropagation();
             $rootScope.confirmAndGoHome()
         });
 
         $scope.$on('$destroy', function() {
             cleanupFunction();
-        });
+        });*/
 
 }])
 

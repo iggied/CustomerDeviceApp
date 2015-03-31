@@ -17,7 +17,7 @@
     <!-- endbuild -->
   </head>
 
-  <body ng-app="CustomerDeviceApp">
+  <body ng-app="AppIndex">
 
 <!--    <ion-pane>
       <ion-header-bar class="bar-stable">
@@ -39,8 +39,6 @@
     <script src="lib/ionic/release/js/ionic.js"></script>
     <script src="lib/ionic/release/js/ionic-angular.js"></script>
     <script src="lib/angular-resource/angular-resource.js"></script>
-    <script src="lib/firebase/firebase.js"></script>
-    <script src="lib/angularfire/dist/angularfire.js"></script>
     <script src="lib/lodash/lodash.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
@@ -85,7 +83,7 @@
             <div>{{area.name}}</div>
 
             <div ng-repeat="table in area.tables">
-              <button class="button button-positive" ng-click="TableSelected($index)"
+              <button class="button button-positive" ng-click="TableSelected(area.id, table.tableNumber)"
                       style="position:absolute;top:{{table.tableXpos}};left:{{table.tableYpos}};height:150px;width:150px">
                 {{table.tableNumber}}
               </button>

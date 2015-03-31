@@ -1,27 +1,26 @@
 'use strict';
-angular.module('RestaurantApp.services', [])
+angular.module('AppMain.services', [])
 
 
-.factory('Menus', ['$resource',
-    function($resource){
+  .factory('Menus', ['$resource', 'managerUrl',
+      function($resource, managerUrl){
 
-        function calcDiscount(response) {
-            var key1, key2, data = response.data;
-            for (key1 in data) {
-                for (key2 in data[key1].priceCat) {
-                    data[key1].priceCat[key2].discountRate = Math.round(data[key1].priceCat[key2].basicRate * 0.85);
-                }
-            }
+          function calcDiscount(response) {
+              var key1, key2, data = response.data;
+              for (key1 in data) {
+                  for (key2 in data[key1].priceCat) {
+                      data[key1].priceCat[key2].discountRate = Math.round(data[key1].priceCat[key2].basicRate * 0.85);
+                  }
+              }
 
-            return response.resource;
-        }
+              return response.resource;
+          }
 
-
-        return $resource('res/appdata/Restaurantmenu.json', {},
-            {query: {method: 'GET', isArray: true, interceptor: {response: calcDiscount }}}
-        );
-    }
-])
+          return $resource( managerUrl, {},
+            {query: {method: 'GET', isArray:true, params: {action: "GETMENU"}, interceptor: {response: calcDiscount }}}
+          );
+      }
+  ])
 
 
 .service('CustomerSvc', ['$window',
@@ -44,8 +43,8 @@ angular.module('RestaurantApp.services', [])
     }
 ])
 
-.service('LoginSvc', ['$state', '$rootScope', '$ionicModal', '$timeout', 'CustomerSvc', 'DialImage', 'VerificationStatus', '$firebase',
-            function ($state, $rootScope, $ionicModal, $timeout, CustomerSvc, DialImage, VerificationStatus, $firebase) {
+.service('LoginSvc', ['$state', '$rootScope', '$ionicModal', '$timeout', 'CustomerSvc', 'DialImage', 'VerificationStatus',
+            function ($state, $rootScope, $ionicModal, $timeout, CustomerSvc, DialImage, VerificationStatus) {
 
     this.setLoginModal = function(modal) {
         this.loginModal = modal;
@@ -92,68 +91,16 @@ angular.module('RestaurantApp.services', [])
                     function (data) {
                         parent.getLoginModal().scope.dialImageRes = data;
 
+/*
                         var ref = new Firebase("https://boiling-fire-4418.firebaseio.com/crn/"+data.SessionId.substr(3));
 
                         ref.once('child_added', function(dataSnapshot){ parent.getLoginModal().scope.login(); });
-
-//                        var sync = $firebase(ref);
-//                        modal.scope.firebaseData = sync.$asObject();
-
-
-                        //data.ImageUrl,data.SessionId
-                    })
-
-/*
-                     .$promise.then( function(data) {
-                        return $timeout(function () {
-                            parent.getLoginModal().scope.checkStatus(data.SessionId);
-                        }, 25000)})
-                    .then( function() {
-                        if (parent.getLoginModal().scope.verificationStatusRes.VerificationStatus != "VERIFIED") {
-                            return $timeout(function () {
-                                parent.getLoginModal().scope.checkStatus(parent.getLoginModal().scope.dialImageRes.SessionId);
-                            }, 5000)
-                        }})
-                    .then(function (data) {
-                        if (parent.getLoginModal().scope.verificationStatusRes.VerificationStatus != "VERIFIED") {
-                            return $timeout(function () {
-                                parent.getLoginModal().scope.checkStatus(parent.getLoginModal().scope.dialImageRes.SessionId);
-                            }, 5000)
-                        }})
-                    .then(function (data) {
-                        if (parent.getLoginModal().scope.verificationStatusRes.VerificationStatus != "VERIFIED") {
-                            return $timeout(function () {
-                                parent.getLoginModal().scope.checkStatus(parent.getLoginModal().scope.dialImageRes.SessionId);
-                            }, 5000)
-                        }})
-                    .then(function (data) {
-                        if (parent.getLoginModal().scope.verificationStatusRes.VerificationStatus != "VERIFIED") {
-                            return $timeout(function () {
-                                parent.getLoginModal().scope.checkStatus(parent.getLoginModal().scope.dialImageRes.SessionId);
-                            }, 5000)
-                        }})
-                    .then(function (data) {
-                        if (parent.getLoginModal().scope.verificationStatusRes.VerificationStatus != "VERIFIED") {
-                            return $timeout(function () {
-                                parent.getLoginModal().scope.checkStatus(parent.getLoginModal().scope.dialImageRes.SessionId);
-                            }, 5000)
-                        }})
-                    .then(function (data) {
-                        if (parent.getLoginModal().scope.verificationStatusRes.VerificationStatus != "VERIFIED") {
-                            return $timeout(function () {
-                                parent.getLoginModal().scope.checkStatus(parent.getLoginModal().scope.dialImageRes.SessionId);
-                            }, 5000)
-                        }})
-                    .then(function (data) {
-                        if (parent.getLoginModal().scope.verificationStatusRes.VerificationStatus != "VERIFIED") {
-                            return $timeout(function () {
-                                parent.getLoginModal().scope.checkStatus(parent.getLoginModal().scope.dialImageRes.SessionId);
-                            }, 5000)
-                        }})
-                    .then(function () {
-                        modal.scope.inAPIcall = 0;
-                    })
 */
+
+
+                    })
+
+
             };
 
             modal.scope.checkStatus = function(sessionId)
@@ -253,7 +200,7 @@ angular.module('RestaurantApp.services', [])
                 email: '',
                 mobile: '',
                 pinCode: '',
-                gender: '',
+                gender: ''
             };
 
             modal.scope.register = function() {
@@ -288,21 +235,95 @@ angular.module('RestaurantApp.services', [])
 
 
 
-.service('OrderSvc', function () {
+
+.factory('OrderRes', ['$resource', 'managerUrl',
+  function($resource, managerUrl){
+
+    return $resource( managerUrl, {action: "@action"},
+      {getOrder: {method: 'GET', isArray:true, params: { tableArea: "@tableArea", tableNumber: "@tableNumber"}}}
+    );
+  }
+])
+
+.service('OrderSvc', function ($rootScope, OrderRes) {
 
     this.setOrder = function (order) {
-        this.$order = order;
+      this.$order = order;
+    }
+
+    this.loadOrder = function () {
+
+
+      var parent = this;
+
+      OrderRes.getOrder({action: "GETORDER", tableArea: $rootScope.tableArea, tableNumber: $rootScope.tableNumber})
+      .$promise.then (
+          function(data) {
+            var o = [];
+            angular.forEach( data, function(item){
+
+              var i = {
+                itemId: item.itemId,
+                itemName: item.itemName,
+                itemDescription: item.itemDescription,
+                priceCatCode: item.catCode,
+                basicRate: item.basicRate,
+                discount: item.discount,
+                discountRate: item.discountRate,
+                quantity: item.quantity,
+                instructions: item.instructions,
+                data: item.data,
+                datetime: Date.now(),
+                orderPlaced: true
+              };
+
+              o.push(i);
+            })
+
+            parent.setOrder( o );
+
+        }
+      );
     }
 
     this.getOrder = function(){
         return this.$order;
     }
 
+    this.getOrderPending = function() {
+      var o = [];
+      angular.forEach(this.getOrder(), function (item) {
+        if (! item.orderPlaced) {
+          o.push(item);
+        }
+      });
+      return o;
+    }
+
+    this.getAndClearOrderPendingData = function(){
+      var i = [];
+      angular.forEach(this.getOrderPending(), function (item) {
+        i.push( item
+
+/*        {  itemId: item.itemId,
+          priceCatCode: item.priceCatCode,
+          quantity: item.quantity,
+          instructions: item.instructions  } */
+        );
+        item.orderPlaced = true;
+
+      });
+
+      this.$saveOrder();
+
+      return {staffId: $rootScope.staffId, tableArea: $rootScope.tableArea, tableNumber: $rootScope.tableNumber, data: i};
+    }
+
     this.addItem = function (menuItem, priceCat) {
         if (!priceCat.quantity) priceCat.quantity = 1;
         priceCat.quantity = parseInt(priceCat.quantity);
 
-        var inOrder = this.itemInOrder(menuItem.itemId, priceCat.catCode)
+        var inOrder = this.itemInOrder(menuItem.itemId, priceCat.catCode, false)
 
         if (inOrder !== false){
             this.quantity(inOrder, priceCat.quantity);
@@ -318,7 +339,9 @@ angular.module('RestaurantApp.services', [])
                 discountRate: priceCat.discountRate,
                 quantity: priceCat.quantity,
                 instructions: "",
-                data: ""
+                data: "",
+                datetime: Date.now(),
+                orderPlaced: false
             };
 
             this.$order.push(i);
@@ -332,7 +355,7 @@ angular.module('RestaurantApp.services', [])
         if (!priceCat.quantity) priceCat.quantity = 1;
         priceCat.quantity = parseInt(priceCat.quantity);
 
-        var inOrder = this.itemInOrder(menuItem.itemId, priceCat.catCode)
+        var inOrder = this.itemInOrder(menuItem.itemId, priceCat.catCode, false)
 
         if (inOrder !== false) {
             if (inOrder.quantity <= 1) {
@@ -352,14 +375,18 @@ angular.module('RestaurantApp.services', [])
         item.quantity = quantity;
     }
 
-    this.itemInOrder = function (itemId, priceCatCode) {
-        var a =  _.findWhere(this.getOrder(), {itemId:itemId, priceCatCode: priceCatCode});
+    this.itemInOrder = function (itemId, priceCatCode, orderPlaced) {
+        var a =  _.findWhere(this.getOrder(), {itemId:itemId, priceCatCode: priceCatCode, orderPlaced: orderPlaced});
         if (a === undefined) return false
         else return a;
     }
 
     this.totalLineItems = function () {
         return this.getOrder().length;
+    }
+
+    this.totalLineItemsPending = function () {
+      return this.getOrderPending().length;
     }
 
     this.getBasicTotal = function(){
@@ -394,11 +421,11 @@ angular.module('RestaurantApp.services', [])
 
     this.empty = function () {
         this.$order = [];
-        localStorage.removeItem('RestaurantOrder');
+        //localStorage.removeItem('RestaurantOrder');
     }
 
     this.$saveOrder = function () {
-        localStorage.setItem('RestaurantOrder', JSON.stringify(this.getOrder()));
+        //localStorage.setItem('RestaurantOrder', JSON.stringify(this.getOrder()));
 
     }
 

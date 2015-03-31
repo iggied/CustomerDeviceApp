@@ -17,15 +17,32 @@
     <!-- endbuild -->
   </head>
 
-  <body ng-app="CustomerDeviceApp">
+  <body ng-app="AppMain">
 
-    <ion-pane>
-      <ion-header-bar class="bar-stable">
-        <h1 class="title">Customer App</h1>
-      </ion-header-bar>
-      <ion-content>
-      </ion-content>
-    </ion-pane>
+  <ion-nav-bar class="bar-header bar-positive" ng-controller="MainCtrl">
+    <ion-nav-back-button class="button-clear ">
+      <i class="ion-arrow-left-c"></i> Back
+<!--
+      <button class="button button-energized icon-left ion-chevron-left">Back</button>
+-->
+    </ion-nav-back-button>
+    <ion-nav-buttons side="left">
+      <button class="button" ng-hide="notInMenu()" ng-click="openLoginModal()">
+        Login
+      </button>
+      <button class="button" ng-hide="notInMenu()" ng-click="openRegisterModal()">
+        Register
+      </button>
+    </ion-nav-buttons>
+
+
+    <ion-nav-buttons side="right">
+      <i ng-show="loggedIn()" style="line-height:30px">Welcome {{customerName}}</i>
+      <button class="button button-clear ion-power" ng-click="notifyGoHome()"></button>
+    </ion-nav-buttons>
+  </ion-nav-bar>
+
+  <ion-nav-view> <i>Loading...</i> </ion-nav-view>
 
     <!-- build:js scripts/vendor.js -->
     <!-- <script src="vendor/someContribJs.js"></script> -->
@@ -37,8 +54,7 @@
     <script src="lib/ionic/release/js/ionic.js"></script>
     <script src="lib/ionic/release/js/ionic-angular.js"></script>
     <script src="lib/angular-resource/angular-resource.js"></script>
-    <script src="lib/firebase/firebase.js"></script>
-    <script src="lib/angularfire/dist/angularfire.js"></script>
+
     <script src="lib/lodash/lodash.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
@@ -49,45 +65,664 @@
 
     <!-- build:js scripts/scripts.js -->
     <script src="scripts/config.js"></script>
-    <script src="scripts/index.js"></script>
+    <script src="scripts/main.js"></script>
     <script src="scripts/services.js"></script>
     <script src="scripts/controllers.js"></script>
     <!-- endbuild -->
 
 
-    <script id="login.html" type="text/ng-template">
-      <!-- The title of the ion-view will be shown on the navbar -->
-      <ion-view title="Welcome to {{programName}} - Staff login">
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="coverpage.html" type="text/ng-template">
+
+      <ion-view title="You are being served by {{staffId}} on {{tableNumber}}">
+
         <ion-content>
-          <form class="list list-inset" ng-submit="login()">
-            <label class="item item-input">
-              <span class="input-label">Staff Id</span>
-              <input type="text" ng-model="staffInput.Id" placeholder="Type your Id" required autofocus>
-            </label>
-            <label class="item item-input">
-              <span class="input-label">Password</span>
-              <input type="password" ng-model="staffInput.Pin" placeholder="Type your password" required>
-            </label>
-
-            <button class="button button-positive button-block">Touch to select table</button>
-          </form>
-        </ion-content>
-      </ion-view>
-    </script>
-
-
-    <script id="tables.html" type="text/ng-template">
-      <ion-view title="Touch a table number to select it">
-        <ion-content>
-          <div ng-repeat="table in tables">
-            <button class="button button-positive" ng-click="TableSelected($index)"
-                    style="position:absolute;top:{{table.tableXpos}};left:{{table.tableYpos}};height:150px;width:150px">
-              {{table.tableNumber}}
-            </button>
+          <div class="row">
+            <div class="col col-100" ng-click="ShowFirstPage()">
+              <img src="images/coverpage.png" width="100%">
+              <img>
+            </div>
           </div>
         </ion-content>
       </ion-view>
     </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="firstpage.html" type="text/ng-template">
+
+      <ion-view title="You are being served by {{staffId}} on {{tableNumber}}">
+
+        <ion-content>
+          <div class="row">
+            <div class="col col-33">
+              <div>
+                <ibenefit-savings/>
+              </div>
+
+              <div align="middle">
+                <a href='#' ng-click="openRegisterModal()">Get your yearly {{programName}} membership at just Rs.{{programFee}}</a>
+              </div>
+            </div>
+
+            <div class="col col-67">
+              <div class="row">
+                <div class="col col-75">
+                  <h2 style="text-align:center">Welcome to {{programName}}</h2>
+                  <img src="images/ibenefit.png" height="144px" width="144px" style="display:block;margin-left:auto;margin-right:auto" ><img>
+                </div>
+              </div>
+              <div class="row" style="height:70px">
+                <div class="col col-75">
+                  <button class="button button-full button-positive" ng-click="openLoginModal()">
+                    Login
+                  </button>
+                </div>
+              </div>
+              <div class="row" style="height:70px">
+                <div class="col col-75">
+                  <button class="button button-full button-positive" ng-click="openRegisterModal()">
+                    Register to {{programName}}
+                  </button>
+                </div>
+              </div>
+              <div class="row" style="height:70px">
+                <div class="col col-75">
+                  <button class="button button-full button-positive" ng-click="showMenu()">
+                    Skip to Menu
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="register-complete.html" type="text/ng-template">
+
+      <ion-view title="You are being served by {{staffId}} on {{tableNumber}}">
+
+        <ion-content>
+          <div>
+
+            <div class="row">
+              <div class="col">
+                <img src="images/ibenefit.png" height="124px" width="124px" style="display:block;margin-left:auto;margin-right:auto" ><img>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <h1 style="text-align:center">Registration Complete</h1>
+                <p style="text-align:center">Please collect your membership card from the Cashier/Manager</p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <img src="images/cardimage.png" height="150px" width="200px" style="display:block;margin-left:auto;margin-right:auto" ><img>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col col-33 col-offset-33">
+                <button class="button button-full button-positive" ng-click="showMenu()">
+                  View Menu
+                </button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <p style="text-align:center">To know more, visit</p>
+                <p style="text-align:center">www.ibenefit.in</p>
+              </div>
+            </div>
+
+          </div>
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="menus.html" type="text/ng-template">
+
+      <ion-view title="You are being served by {{staffId}} on {{tableNumber}}">
+
+        <ion-header-bar class="bar bar-subheader item-input-inset">
+          <label class="item-input-inset">
+            <i class="icon ion-ios7-search placeholder-icon"></i>
+            <input type="search" ng-model="searchInput">
+          </label>
+          <button class="button button-clear" ng-click="searchItems()">
+            Search
+          </button>
+          <h1 class="title"></h1>
+          <div class="buttons">
+            <button class="button" ng-show="orderSvc.totalLineItems()" ng-click="viewOrder()">View order
+              <span class="badge badge-balanced">{{orderSvc.totalLineItems()}}</span>
+            </button>
+          </div>
+        </ion-header-bar>
+
+        <ion-content>
+          <div class="button" ng-repeat="menuArray in menuCat | objectToArray | filter:searchInput" style="float:left;display:inline;margin:5px" ng-click="selectMenuCategory(menuArray[0].itemCatCodes[0])">
+            <img src="images/{{menuArray[0].itemCatCodes[0]}}.png" style="margin-top:10px" height="110px" width="110px"></img>
+            <p style="text-align:center;margin:0;line-height:20px">{{menuArray[0].itemCatCodes[0] | lowercase}}</p>
+          </div>
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="menu-itemlist.html" type="text/ng-template">
+
+      <ion-view>
+
+        <ion-header-bar class="bar bar-subheader item-input-inset">
+          <label class="item-input-inset">
+            <i class="icon ion-ios7-search placeholder-icon"></i>
+            <input type="search" ng-model="searchInput">
+          </label>
+
+          <h1 class="title">{{selectedCatCode | lowercase}}</h1>
+          <div class="buttons">
+            <button class="button" ng-show="orderSvc.totalLineItems()" ng-click="viewOrder()">View order
+              <span class="badge badge-balanced">{{orderSvc.totalLineItems()}}</span>
+            </button>
+          </div>
+        </ion-header-bar>
+
+        <ion-content>
+          <div class="col">
+            <ion-list>
+              <ion-item class="row item-calm">
+                <h2 class="col col-50">Item</h2>
+                <h2 class="col col-10" style="text-align:center">Price</h2>
+                <h2 class="col col-10" style="text-align:center">{{programName}}<br/>Price</h2>
+                <h2 class="col col-10" style="text-align:center">Ordered Qty</h2>
+                <h2 class="col col-10" style="text-align:center">Add item</h2>
+                <h2 class="col col-10" style="text-align:center">Reduce item</h2>
+              </ion-item>
+              <div ng-repeat="menuArray in menuItems">
+                <ion-item class="item item-divider">
+                  {{menuArray[0].itemCatCodes[0]}}
+                </ion-item>
+                <div ng-repeat="menuItem in menuArray | filter:searchInput">
+                  <ion-item class="row" ng-repeat="menuItemPriceCat in menuItem.priceCat">
+                    <a class="col col-50 item-content"  ng-click="showItemDetails(menuItem.itemId, menuItemPriceCat.catCode)">
+                      <h2>{{menuItem.itemName}}</h2>
+                      <p>{{menuItem.itemDescription}}</p>
+                    </a>
+                    <div class="col col-10">
+                      <br/><h3 style="text-align:center">{{menuItemPriceCat.basicRate | number}}</h3>
+                    </div>
+                    <div class="col col-10">
+                      <br/><h3 style="text-align:center">{{menuItemPriceCat.discountRate | number}}</h3>
+                    </div>
+                    <div class="col col-10">
+                      <br/><h3 style="text-align:center">{{ orderSvc.itemInOrder( menuItem.itemId, menuItemPriceCat.catCode, false ).quantity }}</h3>
+                    </div>
+                    <div class="col col-10" style="text-align:center">
+                      <button class="button button-balanced ion-plus-circled" style="font-size:24px" ng-click="orderSvc.addItem(menuItem, menuItemPriceCat)"></button>
+                    </div>
+                    <div class="col col-10" style="text-align:center">
+                      <button class="button button-assertive ion-minus-circled" style="font-size:24px" ng-click="orderSvc.reduceItem(menuItem, menuItemPriceCat)"></button>
+                    </div>
+                  </ion-item>
+                </div>
+              </div>
+            </ion-list>
+          </div>
+
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="view-item.html" type="text/ng-template">
+      <ion-view>
+
+        <ion-header-bar class="bar bar-subheader item-input-inset">
+          <ion-nav-back-button class="button-clear">
+            <i class="ion-arrow-left-c">Back</i>
+          </ion-nav-back-button>
+          <h1 class="title">{{menuItem.itemName}}</h1>
+          <div class="buttons">
+            <button class="button" ng-show="orderSvc.totalLineItems()" ng-click="viewOrder()">View order
+              <span class="badge badge-balanced">{{orderSvc.totalLineItems()}}</span>
+            </button>
+          </div>
+        </ion-header-bar>
+
+        <ion-content>
+          <div class="row">
+            <div class="col col-67">
+              <div class="row">
+                <div class="col col-67">
+                  <img src="images/1.jpg" width="100%" height="100%">
+                </div>
+                <div class="col col-33">
+                  <div class="row">
+                    <input type="text" ng-model="orderItem.instructions" placeholder="Special requests">
+                  </div>
+                  <div class="row">
+                    <p style="text-align:justify">{{menuItem.itemDescription}}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col col-33">
+              <div class="row">
+                <p class="col" style="text-align:center">Quantity</p>
+                <p class="col" style="text-align:center">Regular price</p>
+                <p class="col" style="text-align:center">{{programName}} price</p>
+              </div>
+              <div class="row">
+                <b class="col" style="text-align:center">{{orderSvc.itemInOrder( menuItem.itemId, priceCat.catCode, false ).quantity | number}}</b>
+                <b class="col" style="text-align:center">{{priceCat.basicRate | number}}</b>
+                <b class="col" style="text-align:center">{{priceCat.discountRate | number}}</b>
+              </div>
+              <br/>
+              <div class="row">
+                <div class="col-50">
+                  <button class="button button-balanced ion-plus-circled"  style="font-size:24px" ng-click="orderSvc.addItem(menuItem, priceCat)"></button>
+                  <button class="button button-assertive ion-minus-circled" style="font-size:24px" ng-click="orderSvc.reduceItem(menuItem, priceCat)"></button>
+                </div>
+              </div>
+              <br/>
+              <div class="row">
+                <div class="col">
+                  <button><img src="images/ilikeit.png"></img><p>I like it</p></button>
+                  <button><img src="images/addtofavourite.png"></img><p>Add to my favourites</p></button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <img src="images/{{priceCat.catCode}}.png" width="15%" height="15%"></img>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </ion-content>
+
+      </ion-view>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="view-order.html" type="text/ng-template">
+      <ion-view>
+
+        <ion-header-bar class="bar bar-subheader item-input-inset">
+          <ion-nav-back-button class="button-clear">
+            <i class="ion-arrow-left-c">Back</i>
+          </ion-nav-back-button>
+          <h1 class="title">Your Order</h1>
+
+        </ion-header-bar>
+
+        <ion-content>
+          <div> <order-details/> </div>
+
+          <div class="row">
+            <div class="col" style="text-align:center">
+              <button class="button" ng-hide="loggedIn()" ng-click="openRegisterModal()">
+                Register now
+              </button>
+            </div>
+          </div>
+        </ion-content>
+
+      </ion-view>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="chefcorner.html" type="text/ng-template">
+      <ion-view title="Chef's corner">
+        <ion-content>
+
+
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="softdrinks.html" type="text/ng-template">
+      <ion-view title="Soft drinks">
+        <ion-content>
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="barcounter.html" type="text/ng-template">
+      <ion-view title="Bar Counter">
+        <ion-content>
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="specialoffer.html" type="text/ng-template">
+      <ion-view title="Special Offers">
+        <ion-content>
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="myfavourites.html" type="text/ng-template">
+      <ion-view title="My Favourites">
+        <ion-content>
+        </ion-content>
+      </ion-view>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="ibenefit-savings.html" type="text/ng-template">
+
+      <div class="list list-inset" style="border:thick ridge #9900FF;border-radius:5px;margin-top:0">
+
+        <div class="row-top">
+          <b class="col" style="text-align:center">My i benefit savings calculator</b>
+        </div>
+
+        <div class="row item item-positive" ng-click="touchedNVR()" ng-class="{'item-royal': lastTouched=='NVR'}">
+          <div class="col col-80" style="padding-top:10px">
+            No. of restaurants visits/month
+          </div>
+          <div class="col col-20" style="padding-top:10px;text-align:right" ng-class="{'item item-clear': lastTouched=='NVR'}">
+            {{noOfVisits}}
+          </div>
+        </div>
+
+        <div class="row item item-positive" ng-click="touchedASR()" ng-class="{'item-royal': lastTouched=='ASR'}">
+          <div class="col col-80" style="padding-top:10px">
+            Average spends at restaurant
+          </div>
+          <div class="col col-20" style="padding-top:10px;text-align:right" ng-class="{'item item-clear': lastTouched=='ASR'}">
+            {{avgSpendsAtRestaurants}}
+          </div>
+        </div>
+
+        <div class="row item item-positive" ng-click="touchedNVH()" ng-class="{'item-royal': lastTouched=='NVH'}">
+          <div class="col col-80" style="padding-top:10px;">
+            No. of Home orders/month
+          </div>
+          <div class="col col-20" style="padding-top:10px;text-align:right" ng-class="{'item item-clear': lastTouched=='NVH'}">
+            {{noOfHomeOrders}}
+          </div>
+        </div>
+
+        <div class="row item item-positive" ng-click="touchedASH()" ng-class="{'item-royal': lastTouched=='ASH'}">
+          <div class="col col-80" style="padding-top:10px">
+            Average spends on home order
+          </div>
+          <div class="col col-20" style="padding-top:10px;text-align:right" ng-class="{'item item-clear': lastTouched=='ASH'}">
+            {{avgSpendsOnHomeOrder}}
+          </div>
+        </div>
+        <div class="row-bottom" ng-show="totalSavings()">
+          <p class="col" style="text-align:center;background-color:orange">You can save <b>Rs.{{totalSavings()}}</b>
+            */year and recover the cost of membership the <b>{{approxNoOfTimes()}}</b>
+            time you book your order using i benefit
+          </p>
+        </div>
+
+        <div>
+          <div ng-hide="lastTouched==''">
+            <div class="row button-bar">
+              <button class="col-33 button" ng-click="calcTouched('1')">1</button>
+              <button class="col-33 button" ng-click="calcTouched('2')">2</button>
+              <button class="col-33 button" ng-click="calcTouched('3')">3</button>
+            </div>
+            <div class="row button-bar">
+              <button class="col-33 button" ng-click="calcTouched('4')">4</button>
+              <button class="col-33 button" ng-click="calcTouched('5')">5</button>
+              <button class="col-33 button" ng-click="calcTouched('6')">6</button>
+            </div>
+            <div class="row button-bar">
+              <button class="col-33 button" ng-click="calcTouched('7')">7</button>
+              <button class="col-33 button" ng-click="calcTouched('8')">8</button>
+              <button class="col-33 button" ng-click="calcTouched('9')">9</button>
+            </div>
+            <div class="row button-bar">
+              <button class="col-33 button" ng-click="calcTouched('.')">del</button>
+              <button class="col-33 button" ng-click="calcTouched('0')">0</button>
+              <button class="col-33 button" ng-click="calcTouched('X')">next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+    <!--
+        <script id="login-modal.html" type="text/ng-template">
+            <div class="modal" style="top:10%;height:30%;left:30%;width:50%">
+                <ion-header-bar>
+                    <h1 class="title">Login to {{programName}}</h1>
+                </ion-header-bar>
+                <ion-content>
+                    <div class="list list-inset">
+                        <label class="item item-input">
+                            <span class="input-label">Mobile Number</span>
+                            <input type="number" ng-model="custLoginInput.mobile" placeholder="Type your mobile number">
+                        </label>
+                        <label class="item item-input">
+                            <span class="input-label">Password</span>
+                            <input type="password" ng-model="custLoginInput.pin" placeholder="Type your password">
+                        </label>
+                        <button-bar style="margin-top:20px">
+                            <button class="button button-positive" style="width:150px" ng-click="login()">Login</button>
+                            <button class="button button-outline" style="width:150px" ng-click="close()">Cancel</button>
+                        </button-bar>
+
+                    </div>
+                </ion-content>
+            </div>
+        </script>
+    -->
+
+    <script id="login-modal.html" type="text/ng-template">
+      <div class="modal" style="top:10%;height:35%;left:30%;width:50%">
+        <ion-header-bar>
+          <h1 class="title">Login to {{programName}}</h1>
+        </ion-header-bar>
+        <ion-content>
+          <div>
+            <div>{{firebaseData | json}}</div>
+
+            <div class="row">
+              <div class="col col-80">
+                <label class="item item-input">
+                  <span class="input-label">Mobile Number</span>
+                  <input type="number" maxlength="10" ng-model="custLoginInput.mobile">
+                </label>
+              </div>
+              <div class="col col-20">
+                <button class="button ion-android-call" ng-click="verify()">Verify</button>
+                <span class="ion-loading-c" ng-show="inAPIcall"></span>
+              </div>
+            </div>
+            <label ng-hide="dialImageRes.VerificationNode">
+              <p>Type your registered mobile number and click the Verify button</p>
+              <p>A telephone number will be displayed here. Please give a missed call to that number</p>
+              <p>The call will be automatically disconnect after 2 rings. Wait for a few moments after the call</p>
+            </label>
+            <label ng-show="dialImageRes.VerificationNode">
+              <p>Give a missed call to <b>{{dialImageRes.VerificationNode}}</b> to log you into {{programName}}</p>
+              <p>System will automatically log you in once your missed call is received</p>
+              <p>You can touch Login button if system does not login automatically</p>
+            </label>
+            <button-bar style="margin-top:20px" ng-show="dialImageRes.VerificationNode">
+              <button class="button button-positive" style="width:100px" ng-click="checkStatus(dialImageRes.SessionId)">Login</button>
+              <button class="button button-outline" style="width:100px" ng-click="close()">Cancel</button>
+            </button-bar>
+
+          </div>
+        </ion-content>
+      </div>
+    </script>
+
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="register-modal.html" type="text/ng-template">
+      <div class="modal" style="top:5%;height:80%;left:10%;width:80%">
+        <ion-header-bar>
+          <h1 class="title">Register to {{programName}}</h1>
+        </ion-header-bar>
+        <ion-content>
+          <div class="list list-inset">
+            <label class="item item-input">
+              <span class="input-label" style="width:100px;max-width:100px">First name</span>
+              <input type="text" maxlength="50" ng-model="customerInput.firstName" placeholder="Type your first name">
+              <label class="item-input">
+                <span class="input-label" style="width:100px;max-width:100px">Surname</span>
+                <input type="text" maxlength="50" ng-model="customerInput.surName" placeholder="Type your surname" >
+              </label>
+            </label>
+            <label class="item item-input">
+              <span class="input-label" style="width:100px;max-width:100px">Email</span>
+              <input type="email" maxlength="100" ng-model="customerInput.email" placeholder="Type your email">
+            </label>
+            <label class="item item-input">
+              <span class="input-label" style="width:100px;max-width:100px">Mobile</span>
+              <input type="tel" maxlength="15" ng-model="customerInput.mobile" placeholder="Type your mobile number">
+              <label class="item-input">
+                <span class="input-label" style="width:100px;max-width:100px">PIN code</span>
+                <input type="tel" maxlength="6" ng-model="customerInput.pinCode" placeholder="Type your PIN code">
+              </label>
+            </label>
+
+            <div class="row">
+              <div class="col col-33">
+                <label class="item-input">
+                  <label class="item item-radio">
+                    <input type="radio" name="group" ng-model="customerInput.gender" value="F">
+                    <div class="item-content">
+                      Female
+                    </div>
+                    <i class="radio-icon ion-checkmark-circled"></i>
+                  </label>
+                  <label class="item item-radio">
+                    <input type="radio" name="group" ng-model="customerInput.gender" value="M">
+                    <div class="item-content">
+                      Male
+                    </div>
+                    <i class="radio-icon ion-checkmark-circled"></i>
+                  </label>
+                </label>
+              </div>
+
+              <button-bar class="col col-50 col-offset-20">
+                <button class="button button-positive" style="width:150px" ng-click="showRegister=true" ng-hide="showRegister">Register</button>
+                <button class="button button-outline" style="width:150px" ng-click="close()">Cancel</button>
+              </button-bar>
+            </div>
+
+
+            <div style="margin-top:20px">
+              By tapping Register you agree to pay Rs.650 towards yearly membership
+              <button-bar class="row" ng-show="showRegister">
+                <button class="col col-33 button button-stable" ng-click="register()">Pay online</button>
+                <button class="col col-33 button button-stable" ng-click="register()">Add to Restaurant bill</button>
+                <button class="col col-33 button button-stable" ng-click="skipToMenu()">Skip to menu</button>
+              </button-bar>
+            </div>
+          </div>
+
+        </ion-content>
+      </div>
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
+
+    <script id="order-details.html" type="text/ng-template">
+
+      <div>
+        <ion-list>
+          <ion-item class="row item-balanced">
+            <h2 class="col col-33">Item</h2>
+            <h2 class="col col-10" style="text-align:center">Price</h2>
+            <h2 class="col col-10" style="text-align:center">{{programName}}<br/>Price</h2>
+            <h2 class="col col-10" style="text-align:center">Quantity</h2>
+            <h2 class="col col-20" style="text-align:center">Instructions</h2>
+            <h2 class="col col-10" style="text-align:center">Add/Reduce</h2>
+          </ion-item>
+
+          <ion-item class="row" ng-repeat="item in orderSvc.getOrder() track by $index">
+            <a class="col col-33 item-content" ng-click="showItemDetails(item.itemId, item.priceCatCode)">
+              <h2>{{item.itemName}}</h2>
+              <p>{{item.itemDescription}}</p>
+            </a>
+            <div class="col col-10">
+              <br/><h3 style="text-align:center">{{item.basicRate | number}}</h3>
+            </div>
+            <div class="col col-10">
+              <br/><h3 style="text-align:center">{{item.discountRate | number}}</h3>
+            </div>
+            <div class="col col-10">
+              <br/><h3 style="text-align:center">{{item.quantity | number}}</h3>
+            </div>
+            <div class="col col-20">
+              <input type="text" ng-model="item.instructions" style="text-align:center">
+            </div>
+            <div class="col col-10" style="text-align:center">
+              <button class="button button-small button-balanced ion-plus-circled"  style="font-size:24px" ng-click="addItem($index)" ng-hide="item.orderPlaced"></button>
+              <button class="button button-small button-assertive ion-minus-circled" style="font-size:24px" ng-click="reduceItem($index)" ng-hide="item.orderPlaced"></button>
+            </div>
+          </ion-item>
+
+          <ion-item class="row">
+            <div class="col col-33 item-content">
+              <h2>Totals</h2>
+            </div>
+            <div class="col col-10">
+              <h2 style="text-align:center">{{orderSvc.getBasicTotal() | number}}</h2>
+            </div>
+            <div class="col col-10">
+              <h2 style="text-align:center">{{orderSvc.getDiscountedTotal() | number}}</h2>
+            </div>
+            <div class="col col-10">
+              <h2></h2>
+            </div>
+            <div class="col col-20">
+              <h2></h2>
+            </div>
+            <div class="col col-10" style="text-align:center">
+              <button class="button" ng-show="orderSvc.totalLineItemsPending()" ng-click="confirmOrder()">Confirm order</button>
+            </div>
+          </ion-item>
+
+          <ion-item class="row">
+            <div class="col" style="text-align:center">
+              <h1>Your {{programName}} savings is Rs.{{orderSvc.getBasicTotal()-orderSvc.getDiscountedTotal() | number}}</h1>
+            </div>
+          </ion-item>
+
+
+        </ion-list>
+
+      </div>
+
+    </script>
+
+    <!-------------------------------------------------------------------------------------------------------------->
 
   </body>
 </html>

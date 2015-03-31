@@ -1,5 +1,5 @@
 'use strict';
-angular.module('CustomerDeviceApp', ['ionic', 'config', 'ngResource', 'CustomerDeviceApp.controllers', 'CustomerDeviceApp.services'])
+angular.module('AppIndex', ['ionic', 'config', 'ngResource', 'AppIndex.controllers', 'AppIndex.services'])
 
   .run(function($ionicPlatform) {
     $ionicPlatform.ready(function() {
@@ -15,7 +15,8 @@ angular.module('CustomerDeviceApp', ['ionic', 'config', 'ngResource', 'CustomerD
     });
   })
 
-  .constant('managerUrl', 'http://localhost:8080/outlet/serve')
+//  .constant('managerUrl', 'http://10.0.1.2:8080/outlet/serve')
+  .constant('managerUrl', 'http://192.168.56.101:8080/outlet/serve')
 
   .config(function($stateProvider, $urlRouterProvider) {
 
@@ -46,7 +47,7 @@ angular.module('CustomerDeviceApp', ['ionic', 'config', 'ngResource', 'CustomerD
 
 
 
-angular.module('CustomerDeviceApp.controllers', [])
+angular.module('AppIndex.controllers', [])
 
   .controller('LoginCtrl', ['$scope', '$state', '$rootScope', 'StaffAPIclient', function($scope, $state, $rootScope, StaffAPIclient) {
     $scope.staffInput = {
@@ -73,13 +74,13 @@ angular.module('CustomerDeviceApp.controllers', [])
   .controller('TablesCtrl', ['$scope', '$rootScope', '$window', 'Tables', function($scope, $rootScope, $window, Tables) {
     $scope.tableAreas = Tables.query();
 
-    $scope.TableSelected = function(tableIndex) {
-      $window.location.href = 'main.html#/coverpage/'+$rootScope.staffId+'/'+tableIndex+'/'+$scope.tables[tableIndex].tableNumber;
+    $scope.TableSelected = function(tableArea, tableNumber) {
+      $window.location.href = 'main.html#/coverpage/'+$rootScope.staffId+'/'+tableArea+'/'+tableNumber;
     };
   }]);
 
 
-angular.module('CustomerDeviceApp.services', [])
+angular.module('AppIndex.services', [])
 
   .factory('StaffAPIclient', ['$resource', 'managerUrl', 'transformRequestAsFormPost',
     function($resource, managerUrl, transformRequestAsFormPost) {
