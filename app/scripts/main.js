@@ -15,8 +15,6 @@ angular.module('AppMain', ['ionic', 'config', 'ngResource', 'AppMain.controllers
     });
 
     OrderSvc.setOrder([]);
-
-
     LoginSvc.initialize();
     RegisterSvc.initialize();
 
@@ -298,7 +296,7 @@ angular.module('AppMain', ['ionic', 'config', 'ngResource', 'AppMain.controllers
   .directive('orderDetails', function(OrderSvc) {
     return {
       restrict : 'E',
-      controller : ['$scope', '$rootScope', '$state', '$ionicPopup', 'OrderRes', function($scope, $rootScope, $state, $ionicPopup, OrderRes){
+      controller : ['$scope', '$rootScope', '$state', '$ionicPopup', function($scope, $rootScope, $state, $ionicPopup){
         $scope.orderSvc = OrderSvc;
         $scope.programName = $rootScope.programName;
 
@@ -328,10 +326,7 @@ angular.module('AppMain', ['ionic', 'config', 'ngResource', 'AppMain.controllers
           });
           confirmPopup.then(function (res) {
             if (res) {
-              var orderRes = new OrderRes({action: "PLACEORDER"});
-              orderRes.order = OrderSvc.getAndClearOrderPendingData();
-              orderRes.$save();
-            } else {
+              OrderSvc.placeOrder();
             }
           })
         };

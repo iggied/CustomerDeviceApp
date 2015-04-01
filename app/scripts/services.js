@@ -253,9 +253,7 @@ angular.module('AppMain.services', [])
 
     this.loadOrder = function () {
 
-
       var parent = this;
-
       OrderRes.getOrder({action: "GETORDER", tableArea: $rootScope.tableArea, tableNumber: $rootScope.tableNumber})
       .$promise.then (
           function(data) {
@@ -429,5 +427,10 @@ angular.module('AppMain.services', [])
 
     }
 
-});
+    this.placeOrder = function() {
+        var orderRes = new OrderRes({action: "PLACEORDER"});
+        orderRes.order = this.getAndClearOrderPendingData();
+        orderRes.$save();
+    }
 
+});
