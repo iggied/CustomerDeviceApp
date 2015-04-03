@@ -240,7 +240,7 @@ angular.module('AppMain.services', [])
   function($resource, managerUrl){
 
     return $resource( managerUrl, {action: "@action"},
-      {getOrder: {method: 'GET', isArray:true, params: { tableArea: "@tableArea", tableNumber: "@tableNumber"}}}
+      {getPendingOrder: {method: 'GET', isArray:true, params: { tableArea: "@tableArea", tableNumber: "@tableNumber"}}}
     );
   }
 ])
@@ -254,7 +254,7 @@ angular.module('AppMain.services', [])
     this.loadOrder = function () {
 
       var parent = this;
-      OrderRes.getOrder({action: "GETORDER", tableArea: $rootScope.tableArea, tableNumber: $rootScope.tableNumber})
+      OrderRes.getPendingOrder({action: "GETPENDINGORDERBYTABLE", tableArea: $rootScope.tableArea, tableNumber: $rootScope.tableNumber})
       .$promise.then (
           function(data) {
             var o = [];
@@ -314,7 +314,7 @@ angular.module('AppMain.services', [])
 
       this.$saveOrder();
 
-      return {staffId: $rootScope.staffId, tableArea: $rootScope.tableArea, tableNumber: $rootScope.tableNumber, data: i};
+      return {staffId: $rootScope.staffId, tableNumber: $rootScope.tableNumber, data: i};
     }
 
     this.addItem = function (menuItem, priceCat) {
