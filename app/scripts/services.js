@@ -240,7 +240,7 @@ angular.module('AppMain.services', [])
   function($resource, managerUrl){
 
     return $resource( managerUrl, {action: "@action"},
-      {getPendingOrder: {method: 'GET', isArray:true, params: { tableArea: "@tableArea", tableNumber: "@tableNumber"}}}
+      {getPendingOrder: {method: 'GET', params: { tableArea: "@tableArea", tableNumber: "@tableNumber"}}}
     );
   }
 ])
@@ -251,14 +251,19 @@ angular.module('AppMain.services', [])
       this.$order = order;
     }
 
+    this.setId = function( id ) {
+      this.order_id = id;
+    }
+
     this.loadOrder = function () {
 
       var parent = this;
-      OrderRes.getPendingOrder({action: "GETPENDINGORDERBYTABLE", tableArea: $rootScope.tableArea, tableNumber: $rootScope.tableNumber})
+      OrderRes.getPendingOrder({action: "GETPENDINGORDERBYTABLE", order_id: this.order_id, staffId: $rootScope.staffId, tableNumber: $rootScope.tableNumber})
       .$promise.then (
-          function(data) {
+          function(orders) {
             var o = [];
-            angular.forEach( data, function(item){
+
+            angular.forEach( orders.order.data, function(item){
 
               var i = {
                 itemId: item.itemId,
@@ -278,8 +283,8 @@ angular.module('AppMain.services', [])
               o.push(i);
             })
 
+            parent.setId( orders.order.order_id );
             parent.setOrder( o );
-
         }
       );
     }
@@ -312,9 +317,9 @@ angular.module('AppMain.services', [])
 
       });
 
-      this.$saveOrder();
+      this.$saveOrderLocally();
 
-      return {staffId: $rootScope.staffId, tableNumber: $rootScope.tableNumber, data: i};
+      return {staffId: $rootScope.staffId, tableNumber: $rootScope.tableNumber, order_id: this.order_id, data: i};
     }
 
     this.addItem = function (menuItem, priceCat) {
@@ -345,7 +350,7 @@ angular.module('AppMain.services', [])
             this.$order.push(i);
         };
 
-        this.$saveOrder();
+        this.$saveOrderLocally();
     };
 
 
@@ -363,7 +368,7 @@ angular.module('AppMain.services', [])
             }
         }
 
-        this.$saveOrder();
+        this.$saveOrderLocally();
     };
 
 
@@ -414,7 +419,7 @@ angular.module('AppMain.services', [])
 
     this.removeItem = function (index) {
         this.$order.splice(index, 1);
-        this.$saveOrder(this.$order);
+        this.$saveOrderLocally(this.$order);
     }
 
     this.empty = function () {
@@ -422,13 +427,13 @@ angular.module('AppMain.services', [])
         //localStorage.removeItem('RestaurantOrder');
     }
 
-    this.$saveOrder = function () {
+    this.$saveOrderLocally = function () {
         //localStorage.setItem('RestaurantOrder', JSON.stringify(this.getOrder()));
 
     }
 
     this.placeOrder = function() {
-        var orderRes = new OrderRes({action: "PLACEORDER"});
+        var orderRes = new OrderRes({action: "PLACEORDERPART"});
         orderRes.order = this.getAndClearOrderPendingData();
         orderRes.$save();
     }
