@@ -49,7 +49,7 @@ angular.module('AppIndex', ['ionic', 'config', 'ngResource', 'AppIndex.controlle
 
 angular.module('AppIndex.controllers', [])
 
-  .controller('LoginCtrl', ['$scope', '$state', '$rootScope', 'StaffAPIclient', function($scope, $state, $rootScope, StaffAPIclient) {
+  .controller('LoginCtrl', ['$scope', '$state', '$rootScope', 'ManagerRes', function($scope, $state, $rootScope, ManagerRes) {
     $scope.staffInput = {
       Id: "",
       Pin: ""
@@ -60,19 +60,30 @@ angular.module('AppIndex.controllers', [])
 
       var staffId = $scope.staffInput.Id, staffPin = $scope.staffInput.Pin;
 
-      StaffAPIclient.validateCreds({staffId: staffId, staffPin: staffPin},
+      ManagerRes.validateCreds({staffId: staffId, staffPin: staffPin},
         function(data) {
-          if (data.valid === "1") {
+          if (data.success === "1") {
             $rootScope.staffId = staffId;
+            $rootScope.staffName = data.value.name;
             $state.go('tables');
+          } else {
+            console.log(data.message);
           }
         });
 
     };
   }])
 
-  .controller('TablesCtrl', ['$scope', '$rootScope', '$window', 'Tables', function($scope, $rootScope, $window, Tables) {
-    $scope.tableAreas = Tables.query();
+  .controller('TablesCtrl', ['$scope', '$rootScope', '$window', 'ManagerRes', function($scope, $rootScope, $window, ManagerRes) {
+    ManagerRes.getTables().$promise.then(
+      function (response) {
+        if (response.success === "1") {
+          $scope.tableAreas = response.value.data;
+        } else {
+          console.log(response.message);
+        }
+      }
+    );
 
     $scope.TableSelected = function(tableArea, tableNumber) {
       $window.location.href = 'main.html#/coverpage/'+$rootScope.staffId+'/'+tableArea+'/'+tableNumber;
@@ -82,21 +93,19 @@ angular.module('AppIndex.controllers', [])
 
 angular.module('AppIndex.services', [])
 
-  .factory('StaffAPIclient', ['$resource', 'managerUrl', 'transformRequestAsFormPost',
-    function($resource, managerUrl, transformRequestAsFormPost) {
+  .factory('ManagerRes', ['$resource', 'managerUrl',
+    function($resource, managerUrl) {
       return $resource( managerUrl, {},
-        {validateCreds: {method: 'GET', params: {action: "VALIDATECREDS", staffId: "@StaffId", staffPin: "@StaffPin"}}});
-      //,headers: { 'Content-Type' : undefined }, transformRequest: transformRequestAsFormPost}});
-    }
-  ])
-
-  .factory('Tables', ['$resource', 'managerUrl',
-    function($resource, managerUrl){
-      return $resource( managerUrl, {},
-                      {query: {method: 'GET', isArray:true, params: {action: "GETTABLES"}}}
+        {validateCreds: {method: 'GET', params: {action: "VALIDATECREDS", staffId: "@StaffId", staffPin: "@StaffPin"}},
+         getTables: {method: 'GET', isArray:false, params: {action: "GETTABLES"}}
+        }
       );
     }
   ])
+
+
+
+
 
   // I provide a request-transformation method that is used to prepare the outgoing
   // request as a FORM post instead of a JSON packet.

@@ -6,7 +6,7 @@ angular.module('AppMain.services', [])
       function($resource, managerUrl){
 
           function calcDiscount(response) {
-              var key1, key2, data = response.data;
+              var key1, key2, data = response.data.value.data;
               for (key1 in data) {
                   for (key2 in data[key1].priceCat) {
                       data[key1].priceCat[key2].discountRate = Math.round(data[key1].priceCat[key2].basicRate * 0.85);
@@ -17,7 +17,7 @@ angular.module('AppMain.services', [])
           }
 
           return $resource( managerUrl, {},
-            {query: {method: 'GET', isArray:true, params: {action: "GETMENU"}, interceptor: {response: calcDiscount }}}
+            {query: {method: 'GET', isArray:false, params: {action: "GETMENU"}, interceptor: {response: calcDiscount }}}
           );
       }
   ])

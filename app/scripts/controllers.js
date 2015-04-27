@@ -57,7 +57,11 @@ angular.module('AppMain.controllers', [])
     }
 
     Menus.query( function(data) {
-        $scope.menuCat = _.groupBy(data, function(item){ return item.itemCatCodes[0]; });
+      if (data.success === "1") {
+        $scope.menuCat = _.groupBy(data.value.data, function(item){ return item.itemCatCodes[0]; });
+      } else {
+        console.log(data.message);
+      }
     });
 
     $scope.selectMenuCategory = function(catCodePara) {
